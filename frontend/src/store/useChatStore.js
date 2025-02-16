@@ -33,6 +33,8 @@ export const useChatStore = create((set, get) => ({
       set({ isMessagesLoading: false });
     }
   },
+ 
+  
   sendMessage: async (messageData) => {
     const { selectedUser, messages } = get();
     try {
@@ -49,14 +51,11 @@ export const useChatStore = create((set, get) => ({
   subscribeToMessages: () => {
     const { selectedUser } = get();
     if (!selectedUser) return;
-
     const socket = useAuthStore.getState().socket;
-
     socket.on("newMessage", (newMessage) => {
       const isMessageSentFromSelectedUser =
         newMessage.senderId === selectedUser._id;
       if (!isMessageSentFromSelectedUser) return;
-
       set({
         messages: [...get().messages, newMessage],
       });
@@ -66,6 +65,16 @@ export const useChatStore = create((set, get) => ({
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+  },
+
+  deleteMessages: async (messageId) => {
+    try {
+      await axiosInstance.delete(`/messages/${userId}`);
+      set({ messages: get().messages.filter((msg) => msg._id !== messageId) });
+      toast.success("Message deleted successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to delete message");
+    }
   },
 
   setSelectedUser: (selectedUser) => set({ selectedUser }),

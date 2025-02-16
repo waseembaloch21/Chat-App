@@ -54,14 +54,11 @@ export const sendMessage = async (req, res)=>{
             text,
             image:imageUrl
         })
-
         await newMessage.save()
-
         const reciverSoketId = getReciverSocketId(reciverId)
         if(reciverSoketId){
             io.to(reciverSoketId).emit("newMessage", newMessage);
         }
-
         res.status(200).json(newMessage);
         
     } catch (error) {
@@ -69,3 +66,23 @@ export const sendMessage = async (req, res)=>{
         res.status(500).json({ message: "internal Server Error" });
     }
 }
+
+export const deleteMessage = async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    if (!messageId) {
+      return res.status(400).json({ message: "Message ID is required" });
+    }
+
+    const deletedMessage = await Message.findByIdAndDelete(messageId);
+
+    if (!deletedMessage) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+    res.status(200).json({ message: "Message deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+

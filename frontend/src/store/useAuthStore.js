@@ -40,7 +40,6 @@ export const useAuthStore = create((set, get) => ({
 
       get().connectSocket();
     } catch (error) {
-      // error.response.data.message
       toast.error(error.response.data.message);
     } finally {
       set({ isSigningUp: false });
